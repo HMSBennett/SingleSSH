@@ -112,18 +112,9 @@ resource "azurerm_virtual_machine" "main" {
 	
 	provisioner "remote-exec" {
 		inline = [
-			"sudo apt update",
-			"sudo apt install -y wget vim openjdk-8-jdk openjdk-8-jre",
-			"sudo useradd --create-home jenkinsadm",
-			"sudo usermod --shell /bin/bash jenkinsadm",
-			"sudo /etc/sudoer",
-			"sudo su - jenkinsadm ",
-			"sudo wget https://updates.jenkins-ci.ord/latest/jenkins.war",
-			"sudp cp jenkins.service /ect/systemd/system",
-			"sudo systemctl daemon-reload",			
-			"sudo systemctl start jenkins",
-			"sudo systemctl enable jenkins",
-			"sudo systemctl status jenkins"
+			"git clone https://github.com/HMSBennett/Jenkins",
+			"cd Jenkins",
+			"./jenkinsInstall.sh",
 			]
 		connection{
 			type = "ssh"
