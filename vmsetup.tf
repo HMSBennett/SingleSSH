@@ -50,6 +50,7 @@ resource "azurerm_public_ip" "main" {
 	location = "${azurerm_resource_group.main.location}"
 	resource_group_name = "${azurerm_resource_group.main.name}"
 	allocation_method = "Static"
+	domain_name_label = "hms-${formatdate("DDMMYYhhmmss",timestamp())}"
 
 	tags = {
 		environment = "Production"
@@ -107,5 +108,28 @@ resource "azurerm_virtual_machine" "main" {
 
 	tags = {
 		environment = "staging"	
+	}
+	
+	provisioner "remote-exec" {
+		inline = [
+			"sudo apt update",
+			"sudo apt install -y wget vim openjdk-8-jdk openjdk-8-jre",
+			"sudo useradd --create-home jenkinsadm",
+			"sudo usermod --shell /bin/bash jenkinsadm",
+			"sudo /etc/sudoer",
+			"sudo su - jenkinsadm ",
+			"sudo wget https://updates.jenkins-ci.ord/latest/jenkins.war",
+			"sudp cp jenkins.service /ect/systemd/system",
+			"sudo systemctl daemon-reload",			
+			"sudo systemctl start jenkins",
+			"sudo systemctl enable jenkins",
+			"sudo systemctl status jenkins"
+			]
+		connection{
+			type = "ssh"
+			user = "hms"
+			private_key = file("/home/hms/.ssh/id_rsa")
+			host = "${azurerm_public_ip.main.fqdn}"
+		}
 	}
 }
